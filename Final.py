@@ -12,6 +12,8 @@ pygame.display.set_caption("Space Invader")
 
 background = (22, 20, 87)
 fps = 60
+light_green = (200, 224, 69)
+red = (228, 8, 10)
 
 player_image = pygame.image.load('Assets/Player.png')
 player_image = pygame.transform.scale(player_image, (50, 50))
@@ -35,8 +37,17 @@ class Player:
             self.rect.move_ip(self.speed, 0)
 
 
-player = Player(175, 520)
+class Laser:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x, y, 2, 10)
+        self.speed = 10
 
+    def update(self):
+        self.rect.y -= self.speed
+
+
+player = Player(175, 520)
+lasers = []
 
 run = True
 while run:
@@ -47,9 +58,18 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
-    player.move()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                lasers.append(Laser(player.rect.centerx, player.rect.top))
 
+    player.move()
     screen.blit(player_image, player.rect)
+
+    for laser in lasers[:]:
+        laser.update()
+        pygame.draw.rect(screen, light_green, laser.rect)
+        if laser.rect.bottom < 0:
+            lasers.remove(laser)
 
     pygame.display.update()
 
