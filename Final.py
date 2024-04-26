@@ -29,7 +29,7 @@ class Player:
         self.y = y
         self.rect = player_rect.copy()
         self.rect.topleft = (self.x, self.y)
-        self.speed = 6
+        self.speed = 5
 
     def move(self):
         keys = pygame.key.get_pressed()
@@ -66,7 +66,11 @@ class Alien:
             self.rect.x += self.speed * self.direction
             if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
-                self.rect.y += 20
+                self.rect.y += 50
+
+    def reset_pos(self):
+        self.rect.topleft = (0, -50)
+        self.moving_down = True
 
 
 alien1_image = pygame.image.load('Assets/Alien-V1.png')
@@ -98,6 +102,9 @@ while run:
         pygame.draw.rect(screen, light_green, laser.rect)
         if laser.rect.bottom < 0:
             lasers.remove(laser)
+        if laser.rect.colliderect(alien1.rect):
+            lasers.remove(laser)
+            alien1.reset_pos()
 
     pygame.display.update()
 
