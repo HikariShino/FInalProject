@@ -15,6 +15,9 @@ fps = 60
 light_green = (200, 224, 69)
 red = (228, 8, 10)
 
+score = 0
+font = pygame.font.SysFont('Ariel', 20)
+
 player_image = pygame.image.load('Assets/Player.png')
 player_image = pygame.transform.scale(player_image, (50, 50))
 player_image = pygame.transform.rotate(player_image, 180)
@@ -86,6 +89,9 @@ while run:
     alien1.update()
     screen.blit(alien1.image, alien1.rect)
 
+    score_text = font.render(f'Score: {score}', True, (255, 255, 255))
+    screen.blit(score_text, (10, 475))
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -105,6 +111,7 @@ while run:
         if laser.rect.colliderect(alien1.rect):
             lasers.remove(laser)
             alien1.reset_pos()
+            score += 100
 
     pygame.display.update()
 
