@@ -17,15 +17,15 @@ red = (228, 8, 10)
 score = 0
 font = pygame.font.SysFont('Arial', 20)
 
-
 player_image = pygame.image.load('Assets/Player.png')
 player_image = pygame.transform.scale(player_image, (50, 50))
 player_image = pygame.transform.rotate(player_image, 180)
 player_rect = player_image.get_rect()
 
-
 alien1_image = pygame.image.load('Assets/Alien-V1.png')
 alien1_image = pygame.transform.scale(alien1_image, (25, 25))
+alien2_image = pygame.image.load('Assets/Alien-V2.png')
+alien2_image = pygame.transform.scale(alien1_image, (25, 25))
 
 
 class Player:
@@ -72,6 +72,12 @@ class Alien:
             if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
                 self.rect.y += 50
+        if score >= 500 and score < 1000:
+
+            self.speed = 2
+        if score >= 1000:
+
+            self.speed = 3
 
     def reset_pos(self):
         self.rect.topleft = (0, -50)
@@ -91,7 +97,6 @@ def show_start_screen():
     screen.blit(start_text, start_text_rect)
     pygame.display.update()
 
-    # Wait for a left mouse click
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -108,18 +113,16 @@ if show_start_screen():
 else:
     run = False
 
-# Main game loop
+
 while run:
     fpsClock.tick(fps)
     screen.fill(background)
     alien1.update()
     screen.blit(alien1_image, alien1.rect)
 
-    # Display the score
     score_text = font.render(f'Score: {score}', True, (255, 255, 255))
     screen.blit(score_text, (10, 475))
 
-    # Event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -127,11 +130,9 @@ while run:
             if event.key == pygame.K_SPACE:
                 lasers.append(Laser(player.rect.centerx, player.rect.top))
 
-    # Move the player and draw it on the screen
     player.move()
     screen.blit(player_image, player.rect)
 
-    # Update and draw lasers
     for laser in lasers[:]:
         laser.update()
         pygame.draw.rect(screen, light_green, laser.rect)
@@ -140,10 +141,8 @@ while run:
         if laser.rect.colliderect(alien1.rect):
             lasers.remove(laser)
             alien1.reset_pos()
-            score += 100  # Increase the score when an alien is hit
+            score += 100
 
-    # Update the display
     pygame.display.update()
 
-# Quit the game
 pygame.quit()
