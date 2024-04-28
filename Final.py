@@ -22,11 +22,6 @@ player_image = pygame.transform.scale(player_image, (50, 50))
 player_image = pygame.transform.rotate(player_image, 180)
 player_rect = player_image.get_rect()
 
-alien1_image = pygame.image.load('Assets/Alien-V1.png')
-alien1_image = pygame.transform.scale(alien1_image, (25, 25))
-alien2_image = pygame.image.load('Assets/Alien-V2.png')
-alien2_image = pygame.transform.scale(alien1_image, (25, 25))
-
 
 class Player:
     def __init__(self, x, y):
@@ -53,6 +48,14 @@ class Laser:
         self.rect.y -= self.speed
 
 
+alien1_image = pygame.image.load('Assets/Alien-V1.png')
+alien1_image = pygame.transform.scale(alien1_image, (25, 25))
+alien2_image = pygame.image.load('Assets/Alien-V2.png')
+alien2_image = pygame.transform.scale(alien1_image, (25, 25))
+alien3_image = pygame.image.load('Assets/Alien-V3.png')
+alien3_image = pygame.transform.scale(alien1_image, (25, 25))
+
+
 class Alien:
     def __init__(self, x, y, image):
         self.image = image
@@ -62,7 +65,7 @@ class Alien:
         self.down_speed = 1
         self.moving_down = True
 
-    def update(self):
+    def lvl1(self):
         if self.moving_down:
             self.rect.y += self.down_speed
             if self.rect.top > 0:
@@ -72,16 +75,16 @@ class Alien:
             if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
                 self.rect.y += 50
-        if score >= 500 and score < 1000:
-
-            self.speed = 2
-        if score >= 1000:
-
-            self.speed = 3
+            if score >= 500 < 1000:
+                self.speed = 2
+            if score >= 1000:
+                self.speed = 3
 
     def reset_pos(self):
-        self.rect.topleft = (0, -50)
+        self.rect.topleft = (1, -50)
         self.moving_down = True
+        if self.rect.top > 0:
+            self.moving_down = False
 
 
 alien1 = Alien(0, -50, alien1_image)
@@ -117,7 +120,7 @@ else:
 while run:
     fpsClock.tick(fps)
     screen.fill(background)
-    alien1.update()
+    alien1.lvl1()
     screen.blit(alien1_image, alien1.rect)
 
     score_text = font.render(f'Score: {score}', True, (255, 255, 255))
