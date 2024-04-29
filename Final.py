@@ -1,10 +1,12 @@
 import pygame
 import math
+import random
 
 pygame.init()
 pygame.mixer.init()
 
 laser_sound = pygame.mixer.Sound('Assets/laser.mp3')
+Alien_Hit = pygame.mixer.Sound("Assets/Alien_Destroy.mp3")
 
 fpsClock = pygame.time.Clock()
 screen_width = 400
@@ -113,12 +115,12 @@ class Gunner:
 
 
 class Adv:
-    def __init__(self, x, y, image):
+    def __init__(self, y, image):
         self.image = image
-        self.rect = self.image.get_rect(topleft=(x, y))
         self.down_speed = 1
-        self.x = x
+        self.x = random.randint(100, 300)
         self.y = y
+        self.rect = self.image.get_rect(topleft=(self.x, y))
         self.amplitude = 50  # gap
         self.frequency = 5  # speed for left to right
 
@@ -128,12 +130,13 @@ class Adv:
             self.rect.x = self.x + math.sin(math.radians(self.rect.y * self.frequency)) * self.amplitude
 
     def reset_pos(self):
-        self.rect.topleft = (screen_width / 2, -75)
+        self.x = random.randint(100, 300)
+        self.rect.topleft = (self.x, -75)
 
 
 alien1 = Basic(0, -75, alien1_image)
 alien2 = Gunner(100, 75, alien2_image)
-alien3 = Adv(screen_width / 2, -50, alien3_image)
+alien3 = Adv(-50, alien3_image)
 player = Player(175, 420)
 lasers = []
 
@@ -191,11 +194,13 @@ while run:
             if laser in lasers:
                 lasers.remove(laser)
         if laser.rect.colliderect(alien1.rect):
+            Alien_Hit.play()
             if laser in lasers:
                 lasers.remove(laser)
             alien1.reset_pos()
             score += 100
         if laser.rect.colliderect(alien3.rect):
+            Alien_Hit.play()
             if laser in lasers:
                 lasers.remove(laser)
             alien3.reset_pos()
