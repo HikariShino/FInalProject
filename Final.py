@@ -99,19 +99,25 @@ class Gunner:
     def __init__(self, x, y, image):
         self.image = image
         self.rect = self.image.get_rect(topleft=(x, y))
+        self.y = y
         self.direction = 1
-        self.speed = 1
+        self.speed = 2
         self.down_speed = 1
-        self.moving_down = False
 
-    def update(self):
-        if score >= 500:
-            self.moving_down = True
-            if self.moving_down:
-                self.down_speed = 1
-        if self.rect.y == 50:
-            self.moving_down = False
+    def move(self):
+        if score >= 500 and self.rect.top <= 50:
+            self.rect.y += self.down_speed
+        else:
             self.rect.x += self.speed * self.direction
+            if self.rect.right >= screen_width or self.rect.left <= 0:
+                self.direction *= -1
+
+    def shoot(self):
+        if self.down_speed == 0:
+
+
+    def reset_pos(self):
+        self.rect.topleft = (screen_width / 2, -75)
 
 
 class Adv:
@@ -121,10 +127,10 @@ class Adv:
         self.x = random.randint(100, 300)
         self.y = y
         self.rect = self.image.get_rect(topleft=(self.x, y))
-        self.amplitude = 50  # gap
-        self.frequency = 5  # speed for left to right
+        self.amplitude = 50  # length of sim movement
+        self.frequency = 2  # speed for left to right
 
-    def update(self):
+    def move(self):
         if score >= 1000:
             self.rect.y += self.down_speed
             self.rect.x = self.x + math.sin(math.radians(self.rect.y * self.frequency)) * self.amplitude
@@ -135,7 +141,7 @@ class Adv:
 
 
 alien1 = Basic(0, -75, alien1_image)
-alien2 = Gunner(100, 75, alien2_image)
+alien2 = Gunner(screen_width / 2, -75, alien2_image)
 alien3 = Adv(-50, alien3_image)
 player = Player(175, 420)
 lasers = []
@@ -168,9 +174,12 @@ else:
 while run:
     fpsClock.tick(fps)
     screen.fill(background)
+
     alien1.move()
-    alien3.update()
+    alien2.move()
+    alien3.move()
     screen.blit(alien1_image, alien1.rect)
+    screen.blit(alien2_image, alien2.rect)
     screen.blit(alien3_image, alien3.rect)
 
     score_text = font.render(f'Score: {score}', True, (255, 255, 255))
@@ -193,12 +202,21 @@ while run:
         if laser.rect.top < 0:
             if laser in lasers:
                 lasers.remove(laser)
+
         if laser.rect.colliderect(alien1.rect):
             Alien_Hit.play()
             if laser in lasers:
                 lasers.remove(laser)
             alien1.reset_pos()
             score += 100
+
+        if laser.rect.colliderect(alien2.rect):
+            Alien_Hit.play()
+            if laser in lasers:
+                lasers.remove(laser)
+            alien2.reset_pos()
+            score += 100
+
         if laser.rect.colliderect(alien3.rect):
             Alien_Hit.play()
             if laser in lasers:
