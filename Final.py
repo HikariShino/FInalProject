@@ -1,9 +1,9 @@
 import pygame
+import math
 
 pygame.init()
 
 fpsClock = pygame.time.Clock()
-
 screen_width = 400
 screen_height = 500
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -13,7 +13,6 @@ background = (22, 20, 87)
 fps = 60
 light_green = (200, 224, 69)
 red = (228, 8, 10)
-
 score = 0
 font = pygame.font.SysFont('Arial', 20)
 
@@ -51,12 +50,12 @@ class Laser:
 alien1_image = pygame.image.load('Assets/Alien-V1.png')
 alien1_image = pygame.transform.scale(alien1_image, (25, 25))
 alien2_image = pygame.image.load('Assets/Alien-V2.png')
-alien2_image = pygame.transform.scale(alien1_image, (25, 25))
+alien2_image = pygame.transform.scale(alien2_image, (25, 25))
 alien3_image = pygame.image.load('Assets/Alien-V3.png')
-alien3_image = pygame.transform.scale(alien1_image, (25, 25))
+alien3_image = pygame.transform.scale(alien3_image, (25, 25))
 
 
-class Alien:
+class Basic:
     def __init__(self, x, y, image):
         self.image = image
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -65,7 +64,7 @@ class Alien:
         self.down_speed = 1
         self.moving_down = True
 
-    def lvl1(self):
+    def move(self):
         if self.moving_down:
             self.rect.y += self.down_speed
             if self.rect.top > 0:
@@ -77,17 +76,61 @@ class Alien:
                 self.rect.y += 50
             if score >= 500 < 1000:
                 self.speed = 2
+                self.down_speed = 2
             if score >= 1000:
                 self.speed = 3
+                self.down_speed = 3
 
     def reset_pos(self):
         self.rect.topleft = (1, -50)
         self.moving_down = True
         if self.rect.top > 0:
             self.moving_down = False
+        if self.direction == -1:
+            self.direction *= -1
 
 
-alien1 = Alien(0, -50, alien1_image)
+class Gunner:
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.direction = 1
+        self.speed = 1
+        self.down_speed = 1
+        self.moving_down = False
+
+    def update(self):
+        if score >= 500:
+            self.moving_down = True
+            if self.moving_down:
+                self.down_speed = 1
+        if self.rect.y == 50:
+            self.moving_down = False
+            self.rect.x += self.speed * self.direction
+
+
+class Adv:
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.down_speed = 1
+        self.x = x
+        self.y = y
+        self.amplitude = 50  # gap
+        self.frequency = 5  # speed for left to right
+
+    def update(self):
+        if score >= 1000:
+            self.rect.y += self.down_speed
+            self.rect.x = self.x + math.sin(math.radians(self.rect.y * self.frequency)) * self.amplitude
+
+    def reset_pos(self):
+        self.rect.topleft = (screen_width / 2, -75)
+
+
+alien1 = Basic(0, -75, alien1_image)
+alien2 = Gunner(100, 75, alien2_image)
+alien3 = Adv(screen_width / 2, -50, alien3_image)
 player = Player(175, 420)
 lasers = []
 
@@ -101,6 +144,7 @@ def show_start_screen():
     pygame.display.update()
 
     waiting = True
+
     while waiting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -115,13 +159,13 @@ if show_start_screen():
     run = True
 else:
     run = False
-
-
 while run:
     fpsClock.tick(fps)
     screen.fill(background)
-    alien1.lvl1()
+    alien1.move()
+    alien3.update()
     screen.blit(alien1_image, alien1.rect)
+    screen.blit(alien3_image, alien3.rect)
 
     score_text = font.render(f'Score: {score}', True, (255, 255, 255))
     screen.blit(score_text, (10, 475))
@@ -139,13 +183,19 @@ while run:
     for laser in lasers[:]:
         laser.update()
         pygame.draw.rect(screen, light_green, laser.rect)
-        if laser.rect.bottom < 0:
-            lasers.remove(laser)
+        if laser.rect.top < 0:
+            if laser in lasers:
+                lasers.remove(laser)
         if laser.rect.colliderect(alien1.rect):
-            lasers.remove(laser)
+            if laser in lasers:
+                lasers.remove(laser)
             alien1.reset_pos()
+            score += 100
+        if laser.rect.colliderect(alien3.rect):
+            if laser in lasers:
+                lasers.remove(laser)
+            alien3.reset_pos()
             score += 100
 
     pygame.display.update()
-
 pygame.quit()
