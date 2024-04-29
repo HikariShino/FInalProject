@@ -2,6 +2,9 @@ import pygame
 import math
 
 pygame.init()
+pygame.mixer.init()
+
+laser_sound = pygame.mixer.Sound('Assets/laser.mp3')
 
 fpsClock = pygame.time.Clock()
 screen_width = 400
@@ -175,6 +178,7 @@ while run:
             run = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
+                laser_sound.play()
                 lasers.append(Laser(player.rect.centerx, player.rect.top))
 
     player.move()
