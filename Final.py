@@ -89,6 +89,8 @@ class Basic:
 
     def reset_pos(self):
         self.rect.topleft = (1, -50)
+        self.speed = 1
+        self.down_speed = 1
         self.moving_down = True
         if self.rect.top > 0:
             self.moving_down = False
@@ -113,8 +115,8 @@ class Gunner:
             if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
 
-    #def shoot(self):
-        #if self.down_speed == 0:
+    # def shoot(self):
+        # if self.down_speed == 0:
 
 
     def reset_pos(self):
@@ -187,7 +189,17 @@ def game_over():
     screen.blit(restart_text, restart_rect)
     pygame.display.update()
     pygame.time.wait(3000)
-    return False
+
+    waiting_for_click = True
+    while waiting_for_click:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left click
+                waiting_for_click = False
+
+    return True
 
 
 while run:
@@ -249,6 +261,12 @@ while run:
         pygame.time.wait(1500)
         Game_Over.play()
         run = game_over()
+
+        if run:
+            score = 0
+            alien1.reset_pos()
+            alien2.reset_pos()
+            alien3.reset_pos()
 
     pygame.display.update()
 
