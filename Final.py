@@ -7,6 +7,7 @@ pygame.mixer.init()
 
 laser_sound = pygame.mixer.Sound('Assets/laser.mp3')
 Alien_Hit = pygame.mixer.Sound("Assets/Alien_Destroy.mp3")
+Game_Over = pygame.mixer.Sound("Assets/Game_Over.mp3")
 
 fpsClock = pygame.time.Clock()
 screen_width = 400
@@ -112,8 +113,8 @@ class Gunner:
             if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
 
-    def shoot(self):
-        if self.down_speed == 0:
+    #def shoot(self):
+        #if self.down_speed == 0:
 
 
     def reset_pos(self):
@@ -171,6 +172,24 @@ if show_start_screen():
     run = True
 else:
     run = False
+
+
+def game_over():
+    screen.fill(background)
+    game_over_font = pygame.font.SysFont('Arial', 30)
+    game_over_text = game_over_font.render('Game Over!', True, (255, 255, 255))
+    game_over_rect = game_over_text.get_rect(center=(screen_width/2, screen_height/2))
+
+    restart_text = game_over_font.render('Left Click to Restart', True, (255, 255, 255))
+    restart_rect = game_over_text.get_rect(topleft=(100, game_over_rect.y + 50))
+
+    screen.blit(game_over_text, game_over_rect)
+    screen.blit(restart_text, restart_rect)
+    pygame.display.update()
+    pygame.time.wait(3000)
+    return False
+
+
 while run:
     fpsClock.tick(fps)
     screen.fill(background)
@@ -224,5 +243,13 @@ while run:
             alien3.reset_pos()
             score += 100
 
+    if player.rect.colliderect(alien1.rect) or player.rect.colliderect(alien2.rect) or player.rect.colliderect(
+                alien3.rect):
+        Alien_Hit.play()
+        pygame.time.wait(1500)
+        Game_Over.play()
+        run = game_over()
+
     pygame.display.update()
+
 pygame.quit()
