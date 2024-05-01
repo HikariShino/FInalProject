@@ -8,6 +8,7 @@ pygame.mixer.init()
 laser_sound = pygame.mixer.Sound('Assets/laser.mp3')
 Alien_Hit = pygame.mixer.Sound("Assets/Alien_Destroy.mp3")
 Game_Over = pygame.mixer.Sound("Assets/Game_Over.mp3")
+Alien_Pass = pygame.mixer.Sound("Assets/Warning.mp3")
 
 fpsClock = pygame.time.Clock()
 screen_width = 400
@@ -102,10 +103,11 @@ class Gunner:
     def __init__(self, x, y, image):
         self.image = image
         self.rect = self.image.get_rect(topleft=(x, y))
+        self.x = x
         self.y = y
         self.direction = 1
         self.speed = 2
-        self.down_speed = 1
+        self.down_speed = 2
 
     def move(self):
         if score >= 500 and self.rect.top <= 50:
@@ -115,12 +117,8 @@ class Gunner:
             if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
 
-    # def shoot(self):
-        # if self.down_speed == 0:
-
-
     def reset_pos(self):
-        self.rect.topleft = (screen_width / 2, -75)
+        self.rect.center = (screen_width / 2, -75)
 
 
 class Adv:
@@ -130,7 +128,7 @@ class Adv:
         self.x = random.randint(100, 300)
         self.y = y
         self.rect = self.image.get_rect(topleft=(self.x, y))
-        self.amplitude = 50  # length of sim movement
+        self.amplitude = 50  # length of sin movement
         self.frequency = 2  # speed for left to right
 
     def move(self):
@@ -258,6 +256,13 @@ while run:
     if player.rect.colliderect(alien1.rect) or player.rect.colliderect(alien2.rect) or player.rect.colliderect(
                 alien3.rect):
         Alien_Hit.play()
+        pygame.time.wait(1500)
+        Game_Over.play()
+        run = game_over()
+
+    if (alien1.rect.bottom >= screen_height or alien2.rect.bottom >= screen_height
+            or alien3.rect.bottom >= screen_height):
+        Alien_Pass.play()
         pygame.time.wait(1500)
         Game_Over.play()
         run = game_over()
