@@ -21,6 +21,7 @@ fps = 60
 light_green = (200, 224, 69)
 red = (228, 8, 10)
 score = 0
+life = 100
 font = pygame.font.SysFont('Arial', 20)
 
 player_image = pygame.image.load('Assets/Player.png')
@@ -52,6 +53,15 @@ class Laser:
 
     def update(self):
         self.rect.y -= self.speed
+
+
+class Bullet:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x, y, 6, 10)
+        self.speed = 6
+
+    def update(self):
+        self.rect.y += self.speed
 
 
 alien1_image = pygame.image.load('Assets/Alien-V1.png')
@@ -108,6 +118,9 @@ class Gunner:
         self.direction = 1
         self.speed = 2
         self.down_speed = 2
+        self.bullets = []
+        self.shoot_interval = 1000
+        self.last_shot_time = pygame.time.get_ticks()
 
     def move(self):
         if score >= 500 and self.rect.top <= 50:
@@ -117,8 +130,16 @@ class Gunner:
             if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
 
+    def shoot(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_shot_time > self.shoot_interval and self.rect.top > 0:
+            new_bullet = Bullet(self.rect.centerx, self.rect.bottom)
+            self.bullets.append(new_bullet)
+            self.last_shot_time = current_time
+
     def reset_pos(self):
-        self.rect.center = (screen_width / 2, -75)
+        self.x = random.randint(75, 350)
+        self.rect.topleft = (self.x, -75)
 
 
 class Adv:
@@ -146,6 +167,7 @@ alien2 = Gunner(screen_width / 2, -75, alien2_image)
 alien3 = Adv(-50, alien3_image)
 player = Player(175, 420)
 lasers = []
+bullets = []
 
 
 def show_start_screen():
@@ -213,6 +235,8 @@ while run:
 
     score_text = font.render(f'Score: {score}', True, (255, 255, 255))
     screen.blit(score_text, (10, 475))
+    Lives_text = font.render(f'Health: {life}', True, (255, 255, 255))
+    screen.blit(Lives_text, (300, 475))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -224,6 +248,23 @@ while run:
 
     player.move()
     screen.blit(player_image, player.rect)
+
+    for gunner in [alien2]:
+        gunner.shoot()
+        for bullet in gunner.bullets[:]:
+            bullet.update()
+            pygame.draw.rect(screen, (255, 0, 0), bullet.rect)
+            if bullet.rect.bottom < 0:
+                gunner.bullets.remove(bullet)
+
+            if bullet.rect.colliderect(player.rect):
+                Alien_Hit.play()
+                life -= 25
+                gunner.bullets.remove(bullet)
+                if life <= 0:
+                    pygame.time.wait(1500)
+                    Game_Over.play()
+                    run = game_over()
 
     for laser in lasers[:]:
         laser.update()
@@ -269,9 +310,12 @@ while run:
 
         if run:
             score = 0
+            life = 100
             alien1.reset_pos()
             alien2.reset_pos()
             alien3.reset_pos()
+            alien2.bullets.clear()
+            lasers.clear()
 
     pygame.display.update()
 
