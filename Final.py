@@ -9,6 +9,7 @@ laser_sound = pygame.mixer.Sound('Assets/laser.mp3')
 Alien_Hit = pygame.mixer.Sound("Assets/Alien_Destroy.mp3")
 Game_Over = pygame.mixer.Sound("Assets/Game_Over.mp3")
 Alien_Pass = pygame.mixer.Sound("Assets/Warning.mp3")
+Player_Hit = pygame.mixer.Sound("Assets/Player_Hit.mp3")
 
 fpsClock = pygame.time.Clock()
 screen_width = 400
@@ -81,7 +82,7 @@ class Basic:
             self.rect.x += self.speed * self.direction
             if self.rect.right >= screen_width or self.rect.left <= 0:
                 self.direction *= -1
-                self.rect.y += 50
+                self.rect.y += 75
             if score >= 500 < 1000:
                 self.speed = 2
                 self.down_speed = 2
@@ -169,16 +170,15 @@ bullets = []
 
 basic_aliens = []
 
-# Function to add a new Basic alien at a specific position
+
 def add_basic_alien(x, y, image):
     new_alien = Basic(x, y, image)
     basic_aliens.append(new_alien)
 
-# Add the original Basic alien
+
 add_basic_alien(0, -75, alien1_image)
 
-# Add more Basic aliens above the original
-for i in range(1, 6):  # Add 5 more aliens
+for i in range(1, 12):
     add_basic_alien(0, -75 - i * 50, alien1_image)
 
 
@@ -246,6 +246,9 @@ while run:
     for alien in basic_aliens:
         alien.move()
         screen.blit(alien.image, alien.rect)
+        if player.rect.colliderect(alien.rect):
+            Alien_Hit.play()
+            life = 0
 
     score_text = font.render(f'Score: {score}', True, (255, 255, 255))
     screen.blit(score_text, (10, 475))
@@ -272,7 +275,7 @@ while run:
                 gunner.bullets.remove(bullet)
 
             if bullet.rect.colliderect(player.rect):
-                Alien_Hit.play()
+                Player_Hit.play()
                 life -= 25
                 gunner.bullets.remove(bullet)
 
