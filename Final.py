@@ -55,15 +55,6 @@ class Laser:
         self.rect.y -= self.speed
 
 
-class Bullet:
-    def __init__(self, x, y):
-        self.rect = pygame.Rect(x, y, 6, 10)
-        self.speed = 6
-
-    def update(self):
-        self.rect.y += self.speed
-
-
 alien1_image = pygame.image.load('Assets/Alien-V1.png')
 alien1_image = pygame.transform.scale(alien1_image, (25, 25))
 alien2_image = pygame.image.load('Assets/Alien-V2.png')
@@ -107,6 +98,15 @@ class Basic:
             self.moving_down = False
         if self.direction == -1:
             self.direction *= -1
+
+
+class Bullet:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x, y, 6, 10)
+        self.speed = 6
+
+    def update(self):
+        self.rect.y += self.speed
 
 
 class Gunner:
@@ -261,10 +261,6 @@ while run:
                 Alien_Hit.play()
                 life -= 25
                 gunner.bullets.remove(bullet)
-                if life <= 0:
-                    pygame.time.wait(1500)
-                    Game_Over.play()
-                    run = game_over()
 
     for laser in lasers[:]:
         laser.update()
@@ -297,13 +293,14 @@ while run:
     if player.rect.colliderect(alien1.rect) or player.rect.colliderect(alien2.rect) or player.rect.colliderect(
                 alien3.rect):
         Alien_Hit.play()
-        pygame.time.wait(1500)
-        Game_Over.play()
-        run = game_over()
+        life = 0
 
-    if (alien1.rect.bottom >= screen_height or alien2.rect.bottom >= screen_height
+    elif (alien1.rect.bottom >= screen_height or alien2.rect.bottom >= screen_height
             or alien3.rect.bottom >= screen_height):
         Alien_Pass.play()
+        life = 0
+
+    if life <= 0:
         pygame.time.wait(1500)
         Game_Over.play()
         run = game_over()
