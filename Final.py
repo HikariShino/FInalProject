@@ -90,12 +90,10 @@ class Basic:
                 self.down_speed = 3
 
     def reset_pos(self):
-        self.rect.topleft = (1, -50)
+        self.rect.topleft = (random.randint(0, screen_width - self.rect.width), random.randint(-150, -50))
         self.speed = 1
         self.down_speed = 1
         self.moving_down = True
-        if self.rect.top > 0:
-            self.moving_down = False
         if self.direction == -1:
             self.direction *= -1
 
@@ -162,12 +160,26 @@ class Adv:
         self.rect.topleft = (self.x, -75)
 
 
-alien1 = Basic(0, -75, alien1_image)
+alien = Basic(0, -75, alien1_image)
 alien2 = Gunner(screen_width / 2, -75, alien2_image)
 alien3 = Adv(-50, alien3_image)
 player = Player(175, 420)
 lasers = []
 bullets = []
+
+basic_aliens = []
+
+# Function to add a new Basic alien at a specific position
+def add_basic_alien(x, y, image):
+    new_alien = Basic(x, y, image)
+    basic_aliens.append(new_alien)
+
+# Add the original Basic alien
+add_basic_alien(0, -75, alien1_image)
+
+# Add more Basic aliens above the original
+for i in range(1, 6):  # Add 5 more aliens
+    add_basic_alien(0, -75 - i * 50, alien1_image)
 
 
 def show_start_screen():
@@ -226,12 +238,14 @@ while run:
     fpsClock.tick(fps)
     screen.fill(background)
 
-    alien1.move()
     alien2.move()
     alien3.move()
-    screen.blit(alien1_image, alien1.rect)
     screen.blit(alien2_image, alien2.rect)
     screen.blit(alien3_image, alien3.rect)
+
+    for alien in basic_aliens:
+        alien.move()
+        screen.blit(alien.image, alien.rect)
 
     score_text = font.render(f'Score: {score}', True, (255, 255, 255))
     screen.blit(score_text, (10, 475))
@@ -268,13 +282,13 @@ while run:
         if laser.rect.top < 0:
             if laser in lasers:
                 lasers.remove(laser)
-
-        if laser.rect.colliderect(alien1.rect):
-            Alien_Hit.play()
-            if laser in lasers:
-                lasers.remove(laser)
-            alien1.reset_pos()
-            score += 100
+        for alien in basic_aliens[:]:
+            if laser.rect.colliderect(alien.rect):
+                Alien_Hit.play()
+                if laser in lasers:
+                    lasers.remove(laser)
+                alien.reset_pos()
+                score += 100
 
         if laser.rect.colliderect(alien2.rect):
             Alien_Hit.play()
@@ -290,12 +304,12 @@ while run:
             alien3.reset_pos()
             score += 100
 
-    if player.rect.colliderect(alien1.rect) or player.rect.colliderect(alien2.rect) or player.rect.colliderect(
+    if player.rect.colliderect(alien.rect) or player.rect.colliderect(alien2.rect) or player.rect.colliderect(
                 alien3.rect):
         Alien_Hit.play()
         life = 0
 
-    elif (alien1.rect.bottom >= screen_height or alien2.rect.bottom >= screen_height
+    elif (alien.rect.bottom >= screen_height or alien2.rect.bottom >= screen_height
             or alien3.rect.bottom >= screen_height):
         Alien_Pass.play()
         life = 0
@@ -308,7 +322,8 @@ while run:
         if run:
             score = 0
             life = 100
-            alien1.reset_pos()
+            for alien in basic_aliens[:]:
+                alien.reset_pos()
             alien2.reset_pos()
             alien3.reset_pos()
             alien2.bullets.clear()
